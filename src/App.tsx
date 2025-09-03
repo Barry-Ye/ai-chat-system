@@ -20,9 +20,11 @@ const AppWrapper: React.FC = () => {
     location.pathname === "/login" ||
     location.pathname === "/signup" ||
     location.pathname === "/landing" ||
-    location.pathname === "/";
+    location.pathname === "/" ||
+    location.pathname === "/chat";
 
-  const showFooter = location.pathname === "/landing";
+  const showFooter =
+    location.pathname === "/landing" || location.pathname === "/chat";
 
   return (
     <>
