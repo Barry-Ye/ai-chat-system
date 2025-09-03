@@ -1,11 +1,11 @@
 import React from "react";
-import logo from "../assets/logo.png"; 
+import logo from "../assets/logo.png";
 
 const Footer = () => {
   return (
     <footer className="bg-black text-gray-200 py-6 px-6 md:px-12">
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between gap-6">
-        
+
         {/* Company Info */}
         <div className="w-full md:w-[30%]">
           <div className="flex items-center mb-3">
@@ -25,10 +25,11 @@ const Footer = () => {
         <div className="w-full md:w-[30%]">
           <h3 className="text-lg font-semibold mb-3">Services</h3>
           <ul className="space-y-1 text-gray-400 text-sm">
-            <li><a href="#consultation" className="hover:text-yellow-500 transition">AI Consultation</a></li>
-            <li><a href="#symptoms" className="hover:text-yellow-500 transition">Symptom Analysis</a></li>
-            <li><a href="#chatbot" className="hover:text-yellow-500 transition">Chatbot Integration</a></li>
-            <li><a href="#support" className="hover:text-yellow-500 transition">Customer Support AI</a></li>
+            <li><a href="#consultation" className="hover:text-blue-500 transition">Criminal Law</a></li>
+            <li><a href="#symptoms" className="hover:text-blue-500 transition">Corporate & Commercial Law</a></li>
+            <li><a href="#chatbot" className="hover:text-blue-500 transition">Family Law</a></li>
+            <li><a href="#support" className="hover:text-blue-500 transition">Dispute Resolution / Litigation</a></li>
+            <li><a href="#support" className="hover:text-blue-500 transition">Personal Injury / Insurance Law</a></li>
           </ul>
         </div>
 
@@ -36,10 +37,10 @@ const Footer = () => {
         <div className="w-full md:w-[30%]">
           <h3 className="text-lg font-semibold mb-3">Quick Links</h3>
           <ul className="space-y-1 text-gray-400 text-sm">
-            <li><a href="#home" className="hover:text-yellow-500 transition">Home</a></li>
-            <li><a href="#about" className="hover:text-yellow-500 transition">About</a></li>
-            <li><a href="#services" className="hover:text-yellow-500 transition">Services</a></li>
-            <li><a href="#contact" className="hover:text-yellow-500 transition">Contact</a></li>
+            <li><a href="#home" className="hover:text-blue-500 transition">Home</a></li>
+            <li><a href="#about" className="hover:text-blue-500 transition">About</a></li>
+            <li><a href="#services" className="hover:text-blue-500 transition">Services</a></li>
+            <li><a href="#contact" className="hover:text-blue-500 transition">Contact</a></li>
           </ul>
         </div>
       </div>

@@ -11,6 +11,7 @@ import Header from "./pages/Header";
 import Signup from "./pages/SignUp";
 import Footer from "./pages/Footer";
 import Chat from "./components/Chat";
+import Home from "./pages/Home";
 
 const AppWrapper: React.FC = () => {
   const location = useLocation();
@@ -34,9 +35,9 @@ const AppWrapper: React.FC = () => {
         <Route path="/signup" element={<Signup />} />
         <Route path="/landing" element={<Landing />} />
         <Route path="/chat" element={<Chat />} />
-        <Route path="*" element={<Login />} />
+        <Route path="/" element={<Home />} />
       </Routes>
-      {showFooter && <Footer />}
+      {<Footer />}
     </>
   );
 };
