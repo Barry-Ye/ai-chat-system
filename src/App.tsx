@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -16,7 +16,10 @@ import Home from "./pages/Home";
 const AppWrapper: React.FC = () => {
   const location = useLocation();
 
-  // Show header only on Login/Signup pages
+  // Lifted modal states
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isSignupOpen, setIsSignupOpen] = useState(false);
+
   const showHeader =
     location.pathname === "/login" ||
     location.pathname === "/signup" ||
@@ -29,15 +32,27 @@ const AppWrapper: React.FC = () => {
 
   return (
     <>
-      {showHeader && <Header />}
+      {showHeader && (
+        <Header
+          isLoginOpen={isLoginOpen}
+          setIsLoginOpen={setIsLoginOpen}
+          isSignupOpen={isSignupOpen}
+          setIsSignupOpen={setIsSignupOpen}
+        />
+      )}
+
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/landing" element={<Landing />} />
+        <Route
+          path="/landing"
+          element={<Landing setIsLoginOpen={setIsLoginOpen} />}
+        />
         <Route path="/chat" element={<Chat />} />
         <Route path="/" element={<Home />} />
       </Routes>
-      {<Footer />}
+
+      {showFooter && <Footer />}
     </>
   );
 };
