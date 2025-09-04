@@ -28,8 +28,8 @@ const Chat: React.FC = () => {
   }, [messages, isLoading]);
 
   const handleBackClick = () => {
-    navigate("/landing");
-  };
+    navigate("/home");
+  };    
 
   const suggestions: string[] = [
     "Tell me how can u assist me?",
@@ -82,7 +82,7 @@ const Chat: React.FC = () => {
   };
 
   return (
-    <div className="flex h-[70vh] font-sans text-white relative">
+    <div className="flex h-screen font-sans text-white relative">
       {/* Sidebar */}
       <aside className="w-64 h-full bg-gray-900 text-white flex flex-col p-4 relative z-10 ">
         {/* Top */}
@@ -128,7 +128,7 @@ const Chat: React.FC = () => {
       {/* Main Content */}
       <main className="flex-1 flex flex-col bg-gray-800 relative z-10 ">
         {/* Logo (background) */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-60 pointer-events-none">
+        <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
           <img src={logo} alt="Logo" className="w-100 h-100 object-contain" />
         </div>
 

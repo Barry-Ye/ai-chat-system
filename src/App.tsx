@@ -22,10 +22,11 @@ const AppWrapper: React.FC = () => {
     location.pathname === "/signup" ||
     location.pathname === "/landing" ||
     location.pathname === "/" ||
-    location.pathname === "/chat";
+    location.pathname === "/chat" ||
+    location.pathname === "/home";
 
   const showFooter =
-    location.pathname === "/landing" || location.pathname === "/chat";
+    location.pathname === "/landing";
 
   return (
     <>
@@ -35,9 +36,10 @@ const AppWrapper: React.FC = () => {
         <Route path="/signup" element={<Signup />} />
         <Route path="/landing" element={<Landing />} />
         <Route path="/chat" element={<Chat />} />
-        <Route path="/" element={<Home />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/" element={<Landing />} />
       </Routes>
-      {<Footer />}
+      {showFooter && <Footer />}
     </>
   );
 };

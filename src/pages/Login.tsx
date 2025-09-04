@@ -12,7 +12,7 @@ const Login: React.FC = () => {
 
     // Dummy check
     if (email === "barry" && password === "111") {
-      navigate("/");
+      navigate("/home");
     } else {
       setError("Invalid email or password");
     }
