@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import logo from "../assets/logo.png";
 import TypingDots from "../pages/Loading";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
+  fileName?: string; // optional attachment support
 }
 
 interface ApiResponse {
@@ -21,19 +23,18 @@ interface Conversation {
 const Chat: React.FC = () => {
   const navigate = useNavigate();
   const [conversations, setConversations] = useState<Conversation[]>([
-    { id: Date.now(), messages: [] }, // start with one empty conversation
+    { id: Date.now(), messages: [] },
   ]);
   const [activeId, setActiveId] = useState(conversations[0].id);
   const [input, setInput] = useState("");
+  const [file, setFile] = useState<File | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  // Get active conversation
   const activeConversation = conversations.find((c) => c.id === activeId)!;
 
-  // Auto-scroll
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [activeConversation.messages, isLoading]);
@@ -53,15 +54,16 @@ const Chat: React.FC = () => {
   };
 
   const sendMessage = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() && !file) return;
 
-    if (showSuggestions) {
-      setShowSuggestions(false);
-    }
+    if (showSuggestions) setShowSuggestions(false);
 
-    const userMessage: Message = { role: "user", content: input };
+    const userMessage: Message = {
+      role: "user",
+      content: input || "[Sent a logo]",
+      fileName: file ? file.name : undefined,
+    };
 
-    // Add user message
     setConversations((prev) =>
       prev.map((conv) =>
         conv.id === activeId
@@ -71,15 +73,17 @@ const Chat: React.FC = () => {
     );
 
     setIsLoading(true);
+    setInput("");
+    setFile(null);
 
     try {
+      const formData = new FormData();
+      formData.append("message", input);
+      if (file) formData.append("file", file);
+
       const response = await fetch(
         "https://primary-production-4a149.up.railway.app/webhook/assistant",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: input }),
-        }
+        { method: "POST", body: formData }
       );
 
       const data: ApiResponse = await response.json();
@@ -116,10 +120,8 @@ const Chat: React.FC = () => {
     }
 
     setIsLoading(false);
-    setInput("");
   };
 
-  // Send message when pressing Enter (Shift+Enter = new line)
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -127,7 +129,6 @@ const Chat: React.FC = () => {
     }
   };
 
-  // Start new conversation
   const startNewChat = () => {
     const newConv: Conversation = { id: Date.now(), messages: [] };
     setConversations((prev) => [...prev, newConv]);
@@ -154,9 +155,9 @@ const Chat: React.FC = () => {
           </button>
         </div>
 
-        {/* Chat history list */}
+        {/* Chat history */}
         <div className="flex-1 overflow-y-auto space-y-2 custom-scrollbar">
-          <span className="text-sm text-gray-400 px-2">Chat History</span>
+          <span className="text-sm text-gray-400 px-2 mb-4g block">Chat History</span>
           {conversations.map((conv) => {
             const firstMessage = conv.messages.find((m) => m.role === "user");
             return (
@@ -188,7 +189,7 @@ const Chat: React.FC = () => {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col bg-gray-800 relative z-10">
-        {/* Logo (background) */}
+        {/* Logo Background */}
         <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
           <img src={logo} alt="Logo" className="w-100 h-100 object-contain" />
         </div>
@@ -208,13 +209,29 @@ const Chat: React.FC = () => {
                 </div>
               )}
               <div
-                className={`max-w-xl p-4 rounded-lg ${
+                className={`max-w-xl p-4 rounded-lg break-words ${
                   msg.role === "user"
                     ? "bg-blue-600 text-white"
                     : "bg-gray-700 text-gray-200"
                 }`}
               >
-                {msg.content}
+                {msg.role === "assistant" ? (
+                  <ReactMarkdown>{msg.content}</ReactMarkdown>
+                ) : (
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {msg.content}
+                  </ReactMarkdown>
+                )}
+                {msg.fileName && (
+                  <p className="text-xs mt-1 text-gray-300 italic flex items-center gap-1">
+                    <img
+                      src="https://unpkg.com/heroicons@2.0.16/24/solid/paper-clip.svg"
+                      alt="attachment"
+                      className="w-4 h-4"
+                    />
+                    {msg.fileName}
+                  </p>
+                )}
               </div>
               {msg.role === "user" && (
                 <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white">
@@ -252,8 +269,32 @@ const Chat: React.FC = () => {
           </div>
         )}
 
-        {/* Input */}
+        {/* Input + File Upload */}
         <div className="w-full max-w-3xl mx-auto flex items-center bg-gray-700 rounded-full shadow-md border border-gray-600 px-4 py-2 mb-4 z-10">
+          {/* File Upload */}
+          <label className="cursor-pointer text-gray-300 hover:text-white mr-3">
+            <img
+              src="https://unpkg.com/heroicons@2.0.16/24/outline/paper-clip.svg"
+              alt="Attach"
+              className="w-5 h-5"
+            />
+            <input
+              type="file"
+              className="hidden"
+              onChange={(e) => {
+                if (e.target.files && e.target.files[0]) {
+                  setFile(e.target.files[0]);
+                }
+              }}
+            />
+          </label>
+          {file && (
+            <span className="text-xs text-gray-300 mr-3 truncate max-w-[120px]">
+              {file.name}
+            </span>
+          )}
+
+          {/* Text Input */}
           <textarea
             className="flex-1 bg-transparent text-white focus:outline-none resize-none placeholder-gray-400 text-sm h-10 py-2 px-2 rounded-full"
             placeholder="Type a message..."
@@ -262,6 +303,8 @@ const Chat: React.FC = () => {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
           />
+
+          {/* Send Button */}
           <button
             onClick={sendMessage}
             className="bg-gray-600 text-white p-2 rounded-lg ml-2 hover:bg-gray-500 transition"
