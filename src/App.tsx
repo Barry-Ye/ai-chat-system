@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -16,28 +16,40 @@ import Home from "./pages/Home";
 const AppWrapper: React.FC = () => {
   const location = useLocation();
 
-  // Show header only on Login/Signup pages
+  // Lifted modal states
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isSignupOpen, setIsSignupOpen] = useState(false);
+
   const showHeader =
     location.pathname === "/login" ||
     location.pathname === "/signup" ||
     location.pathname === "/landing" ||
     location.pathname === "/" ||
-    location.pathname === "/chat" ||
     location.pathname === "/home";
 
-  const showFooter =
-    location.pathname === "/landing";
+  const showFooter = location.pathname === "/landing";
 
   return (
     <>
-      {showHeader && <Header />}
+      {showHeader && (
+        <Header
+          isLoginOpen={isLoginOpen}
+          setIsLoginOpen={setIsLoginOpen}
+          isSignupOpen={isSignupOpen}
+          setIsSignupOpen={setIsSignupOpen}
+        />
+      )}
+
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/landing" element={<Landing />} />
+        <Route
+          path="/landing"
+          element={<Landing setIsLoginOpen={setIsLoginOpen} />}
+        />
         <Route path="/chat" element={<Chat />} />
         <Route path="/home" element={<Home />} />
-        <Route path="/" element={<Landing />} />
+        <Route path="/" element={<Landing setIsLoginOpen={setIsLoginOpen} />} />
       </Routes>
       {showFooter && <Footer />}
     </>

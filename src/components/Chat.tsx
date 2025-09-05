@@ -13,23 +13,34 @@ interface ApiResponse {
   output?: string;
 }
 
+interface Conversation {
+  id: number;
+  messages: Message[];
+}
+
 const Chat: React.FC = () => {
   const navigate = useNavigate();
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([
+    { id: Date.now(), messages: [] }, // start with one empty conversation
+  ]);
+  const [activeId, setActiveId] = useState(conversations[0].id);
   const [input, setInput] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  // Auto-scroll to bottom when messages change
+  // Get active conversation
+  const activeConversation = conversations.find((c) => c.id === activeId)!;
+
+  // Auto-scroll
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isLoading]);
+  }, [activeConversation.messages, isLoading]);
 
   const handleBackClick = () => {
     navigate("/home");
-  };    
+  };
 
   const suggestions: string[] = [
     "Tell me how can u assist me?",
@@ -49,7 +60,16 @@ const Chat: React.FC = () => {
     }
 
     const userMessage: Message = { role: "user", content: input };
-    setMessages((prev) => [...prev, userMessage]);
+
+    // Add user message
+    setConversations((prev) =>
+      prev.map((conv) =>
+        conv.id === activeId
+          ? { ...conv, messages: [...conv.messages, userMessage] }
+          : conv
+      )
+    );
+
     setIsLoading(true);
 
     try {
@@ -68,23 +88,57 @@ const Chat: React.FC = () => {
         content: data.output || "No response received",
       };
 
-      setMessages((prev) => [...prev, assistantMessage]);
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv.id === activeId
+            ? { ...conv, messages: [...conv.messages, assistantMessage] }
+            : conv
+        )
+      );
     } catch (error) {
       console.error("Chat API error:", error);
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: "Sorry, Error connecting to server." },
-      ]);
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv.id === activeId
+            ? {
+                ...conv,
+                messages: [
+                  ...conv.messages,
+                  {
+                    role: "assistant",
+                    content: "Sorry, Error connecting to server.",
+                  },
+                ],
+              }
+            : conv
+        )
+      );
     }
 
     setIsLoading(false);
     setInput("");
   };
 
+  // Send message when pressing Enter (Shift+Enter = new line)
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
+
+  // Start new conversation
+  const startNewChat = () => {
+    const newConv: Conversation = { id: Date.now(), messages: [] };
+    setConversations((prev) => [...prev, newConv]);
+    setActiveId(newConv.id);
+    setShowSuggestions(true);
+  };
+
   return (
     <div className="flex h-screen font-sans text-white relative">
       {/* Sidebar */}
-      <aside className="w-64 h-full bg-gray-900 text-white flex flex-col p-4 relative z-10 ">
+      <aside className="w-64 h-full bg-gray-900 text-white flex flex-col p-4 relative z-10">
         {/* Top */}
         <div>
           <button
@@ -100,41 +154,48 @@ const Chat: React.FC = () => {
           </button>
         </div>
 
-        {/* Chat history (scrollable area like ChatGPT) */}
+        {/* Chat history list */}
         <div className="flex-1 overflow-y-auto space-y-2 custom-scrollbar">
           <span className="text-sm text-gray-400 px-2">Chat History</span>
-          {messages.length === 0 ? (
-            <p className="text-gray-500 text-sm px-2">No chats yet</p>
-          ) : (
-            messages.map((msg, idx) => (
+          {conversations.map((conv) => {
+            const firstMessage = conv.messages.find((m) => m.role === "user");
+            return (
               <div
-                key={idx}
-                className="px-3 py-2 rounded-md bg-gray-800 text-gray-200 text-sm cursor-pointer hover:bg-gray-700 truncate"
+                key={conv.id}
+                onClick={() => setActiveId(conv.id)}
+                className={`px-3 py-2 rounded-md text-sm cursor-pointer truncate ${
+                  conv.id === activeId
+                    ? "bg-gray-700 text-white"
+                    : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                }`}
               >
-                {msg.content.slice(0, 30)}...
+                {firstMessage ? firstMessage.content.slice(0, 30) : "New Chat"}
               </div>
-            ))
-          )}
+            );
+          })}
         </div>
 
         {/* Bottom */}
         <div className="mt-4">
-          <button className="w-full bg-gray-800 text-gray-300 py-2 rounded-md hover:bg-gray-700 text-sm">
+          <button
+            onClick={startNewChat}
+            className="w-full bg-gray-800 text-gray-300 py-2 rounded-md hover:bg-gray-700 text-sm"
+          >
             + New Chat
           </button>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col bg-gray-800 relative z-10 ">
+      <main className="flex-1 flex flex-col bg-gray-800 relative z-10">
         {/* Logo (background) */}
         <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
           <img src={logo} alt="Logo" className="w-100 h-100 object-contain" />
         </div>
 
-        {/* Messages (scrollable) */}
+        {/* Messages */}
         <div className="flex-1 w-full max-w-3xl mx-auto overflow-y-auto px-6 py-6 space-y-6 custom-scrollbar relative z-10">
-          {messages.map((msg, idx) => (
+          {activeConversation.messages.map((msg, idx) => (
             <div
               key={idx}
               className={`flex items-start space-x-4 ${
@@ -163,7 +224,6 @@ const Chat: React.FC = () => {
             </div>
           ))}
 
-          {/* Typing animation */}
           {isLoading && (
             <div className="flex items-start space-x-4">
               <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-gray-300">
@@ -177,7 +237,7 @@ const Chat: React.FC = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Suggestions (before first question) */}
+        {/* Suggestions */}
         {showSuggestions && (
           <div className="w-full max-w-3xl mx-auto mb-3 flex flex-wrap gap-2 px-6 z-10">
             {suggestions.map((s, idx) => (
@@ -192,7 +252,7 @@ const Chat: React.FC = () => {
           </div>
         )}
 
-        {/* Input Box (pinned at bottom) */}
+        {/* Input */}
         <div className="w-full max-w-3xl mx-auto flex items-center bg-gray-700 rounded-full shadow-md border border-gray-600 px-4 py-2 mb-4 z-10">
           <textarea
             className="flex-1 bg-transparent text-white focus:outline-none resize-none placeholder-gray-400 text-sm h-10 py-2 px-2 rounded-full"
@@ -200,6 +260,7 @@ const Chat: React.FC = () => {
             rows={1}
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
           />
           <button
             onClick={sendMessage}

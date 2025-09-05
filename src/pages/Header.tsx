@@ -1,21 +1,36 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import logo from "../assets/logo.png";
+import Modal from "../components/Modal";
+import LoginForm from "../components/LoginForm";
+import SignupForm from "../components/SignupForm";
 
-const Header = () => {
+interface HeaderProps {
+  isLoginOpen: boolean;
+  setIsLoginOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isSignupOpen: boolean;
+  setIsSignupOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const Header: React.FC<HeaderProps> = ({
+  isLoginOpen,
+  setIsLoginOpen,
+  isSignupOpen,
+  setIsSignupOpen,
+}) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLLIElement>(null);
+  const [isLogin, setIsLogin] = useState(true);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   const handleLogout = () => {
-    // Add your logout logic here
-    navigate("/login");
+    setIsLogin(false);
   };
 
   const menuItems = ["Home", "About", "Services", "Contact"];
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -30,6 +45,33 @@ const Header = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  const handleLogin = (email: string, password: string) => {
+    if (email === "barry" && password === "111") {
+      setDropdownOpen(false);
+      setIsLoginOpen(false);
+      setIsLogin(true);
+      setLoginError(null);
+      navigate("/home");
+    } else {
+      setLoginError("Invalid email or password");
+    }
+  };
+
+  const handleSignup = (fullName: string, email: string, password: string) => {
+    alert(`Signed up: ${fullName} (${email})${password}`);
+    setIsSignupOpen(false);
+  };
+
+  const openSignupFromLogin = () => {
+    setIsLoginOpen(false);
+    setIsSignupOpen(true);
+  };
+
+  const openLoginFromSignup = () => {
+    setIsSignupOpen(false);
+    setIsLoginOpen(true);
+  };
 
   return (
     <header className="w-full bg-black shadow-sm py-4 px-20 flex items-center justify-between relative">
@@ -48,7 +90,7 @@ const Header = () => {
           </li>
         ))}
 
-        {location.pathname === "/" ? (
+        {isLogin ? (
           <li className="relative" ref={dropdownRef}>
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -78,18 +120,32 @@ const Header = () => {
               </ul>
             )}
           </li>
-        ) : (
+        ) : location.pathname !== "/landing" && !isLogin ? (
           <li>
-            <a
-              href="/login"
-              className="relative group hover:text-white transition-colors duration-300"
+            <button
+              onClick={() => setIsLoginOpen(true)}
+              className="relative group hover:text-white transition-colors duration-300 font-medium text-lg"
             >
               Login
               <span className="absolute left-0 -bottom-1 w-full h-0.5 bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></span>
-            </a>
+            </button>
           </li>
-        )}
+        ) : null}
       </ul>
+
+      {/* Login Modal */}
+      <Modal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)}>
+        <LoginForm
+          onLogin={handleLogin}
+          error={loginError}
+          onSignupClick={openSignupFromLogin}
+        />
+      </Modal>
+
+      {/* Signup Modal */}
+      <Modal isOpen={isSignupOpen} onClose={() => setIsSignupOpen(false)}>
+        <SignupForm onSignup={handleSignup} onLoginClick={openLoginFromSignup} />
+      </Modal>
     </header>
   );
 };
