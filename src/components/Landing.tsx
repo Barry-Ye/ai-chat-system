@@ -1,5 +1,7 @@
 import React from "react";
 import hero from "../assets/hero.jpg";
+import { Button } from "@mui/material";
+import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
 
 interface LandingProps {
   setIsLoginOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -44,7 +46,7 @@ const Landing: React.FC<LandingProps> = ({ setIsLoginOpen }) => {
       {/* Hero Section */}
       <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6">
         <div
-          className="absolute inset-0 bg-cover bg-center opacity-30"
+          className="absolute inset-0 bg-cover bg-center opacity-4"
           style={{ backgroundImage: `url(${hero})` }}
         ></div>
 
@@ -58,7 +60,7 @@ const Landing: React.FC<LandingProps> = ({ setIsLoginOpen }) => {
           </h1>
 
           <div className="mt-8 max-w-3xl mx-auto text-center">
-            <p className="text-white italic font-semibold text-xl md:text-2xl tracking-wide border-b-2 border-blue-500 inline-block pb-1">
+            <p className="text-white italic font-semibold text-xl md:text-2xl tracking-wide border-b-2 border-gray-500 inline-block pb-1">
               We cannot rewrite yesterday, but we can have your back tomorrow.
             </p>
           </div>
@@ -73,12 +75,19 @@ const Landing: React.FC<LandingProps> = ({ setIsLoginOpen }) => {
           </p>
 
           <div className="mt-8">
-            <button
+            <Button
+              variant="contained"
+              className="!bg-gray-600 !text-white 
+             !rounded-full !shadow-2xl !px-10 !py-5 
+             !text-xl font-bold tracking-wide
+             hover:!bg-gray-700 
+             active:scale-95 
+             transition-all duration-200 "
+              startIcon={<RocketLaunchIcon className="!text-2xl" />}
               onClick={() => setIsLoginOpen(true)}
-              className="px-8 py-3 rounded-full text-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-all duration-300 shadow-lg cursor-pointer"
             >
               Get Started
-            </button>
+            </Button>
           </div>
         </div>
       </section>
@@ -98,7 +107,7 @@ const Landing: React.FC<LandingProps> = ({ setIsLoginOpen }) => {
           {companyFlow.map((step, index) => (
             <div
               key={index}
-              className="relative bg-gradient-to-br from-gray-850 to-gray-800 text-white p-8 rounded-3xl shadow-lg transform transition-all hover:shadow-2xl hover:-translate-y-2 border border-blue-600 hover:border-transparent"
+              className="relative bg-gradient-to-br from-gray-850 to-gray-800 text-white p-8 rounded-3xl shadow-lg transform transition-all hover:shadow-2xl hover:-translate-y-2 border border-gray-500 hover:border-transparent"
             >
               {/* Icon in muted circle */}
               <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gray-700 flex items-center justify-center shadow-md">
@@ -113,12 +122,6 @@ const Landing: React.FC<LandingProps> = ({ setIsLoginOpen }) => {
             </div>
           ))}
         </div>
-
-
-
-
-
-
 
       </section>
     </div>

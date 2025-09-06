@@ -1,4 +1,6 @@
+import { Button } from "@mui/material";
 import React, { useState } from "react";
+import LoginIcon from "@mui/icons-material/Login";
 
 interface LoginFormProps {
     onLogin: (email: string, password: string) => void;
@@ -36,12 +38,14 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onSignupClick, error }) 
                     onChange={(e) => setPassword(e.target.value)}
                     className="px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-400"
                 />
-                <button
+                <Button
+                    variant="contained"
                     type="submit"
-                    className="bg-gray-900 text-white py-3 rounded hover:bg-gray-800 transition"
+                    startIcon={<LoginIcon />}
+                    className="!bg-gray-900 text-white py-3 rounded hover:!bg-gray-800 transition"
                 >
                     Login
-                </button>
+                </Button>
             </form>
 
             {error && <p className="text-red-500 mt-4 text-center">{error}</p>}

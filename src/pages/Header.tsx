@@ -1,9 +1,14 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import logo from "../assets/logo.png";
 import Modal from "../components/Modal";
 import LoginForm from "../components/LoginForm";
 import SignupForm from "../components/SignupForm";
+import ProfileMenu from "../components/ProfileMenu";
+import MenuIcon from "@mui/icons-material/Menu";
+import CloseIcon from "@mui/icons-material/Close";
+import LoginIcon from "@mui/icons-material/Login";
+import { Button, IconButton } from "@mui/material";
 
 interface HeaderProps {
   isLoginOpen: boolean;
@@ -20,35 +25,14 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLLIElement>(null);
   const [isLogin, setIsLogin] = useState(true);
   const [loginError, setLoginError] = useState<string | null>(null);
-
-  const handleLogout = () => {
-    setIsLogin(false);
-  };
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const menuItems = ["Home", "About", "Services", "Contact"];
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setDropdownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
   const handleLogin = (email: string, password: string) => {
     if (email === "barry" && password === "111") {
-      setDropdownOpen(false);
       setIsLoginOpen(false);
       setIsLogin(true);
       setLoginError(null);
@@ -74,10 +58,14 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="w-full bg-black shadow-sm py-4 px-20 flex items-center justify-between relative">
-      <img src={logo} alt="Logo" className="h-14 w-auto" />
+    <header className="w-full bg-gray-900 shadow-sm py-4 px-6 md:px-20 flex items-center justify-between relative">
+      {/* LEFT: Logo */}
+      <div className="flex-shrink-0">
+        <img src={logo} alt="Logo" className="h-14 w-auto" />
+      </div>
 
-      <ul className="hidden md:flex space-x-8 text-[#d1d5db] font-medium text-lg items-center">
+      {/* CENTER: Navigation Links */}
+      <ul className="hidden md:flex space-x-10 text-[#d1d5db] font-medium text-lg items-center">
         {menuItems.map((item) => (
           <li key={item}>
             <a
@@ -85,53 +73,95 @@ const Header: React.FC<HeaderProps> = ({
               className="relative group hover:text-white transition-colors duration-300"
             >
               {item}
-              <span className="absolute left-0 -bottom-1 w-full h-0.5 bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></span>
+              <span className="absolute left-0 -bottom-1 w-full h-0.5 bg-gray-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></span>
             </a>
           </li>
         ))}
-
-        {isLogin ? (
-          <li className="relative" ref={dropdownRef}>
-            <button
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center justify-center w-full px-4 py-2 border border-white rounded-full hover:bg-gray-800 transition-colors duration-300 text-white font-semibold cursor-pointer"
-            >
-              <span className="mx-2">Bounce Aung</span>
-              <span className="text-lg">&#x25BC;</span>
-            </button>
-
-            {dropdownOpen && (
-              <ul className="absolute right-0 mt-2 w-40 bg-black border border-gray-700 rounded-md shadow-lg py-2 z-50">
-                <li
-                  className="px-4 py-2 hover:bg-gray-800 cursor-pointer"
-                  onClick={() => navigate("/profile")}
-                >
-                  Profile
-                </li>
-                <li
-                  className="px-4 py-2 hover:bg-gray-800 cursor-pointer"
-                  onClick={handleLogout}
-                >
-                  Logout
-                </li>
-                <li className="px-4 py-2 hover:bg-gray-800 cursor-pointer">
-                  Settings
-                </li>
-              </ul>
-            )}
-          </li>
-        ) : location.pathname !== "/landing" && !isLogin ? (
-          <li>
-            <button
-              onClick={() => setIsLoginOpen(true)}
-              className="relative group hover:text-white transition-colors duration-300 font-medium text-lg"
-            >
-              Login
-              <span className="absolute left-0 -bottom-1 w-full h-0.5 bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></span>
-            </button>
-          </li>
-        ) : null}
       </ul>
+
+      {/* RIGHT: ProfileMenu or Login */}
+      <div className="hidden md:flex items-center space-x-4">
+        {isLogin ? (
+          <ProfileMenu
+            setIsLogin={setIsLogin}
+          />
+        ) : location.pathname !== "/landing" && !isLogin ? (
+          <Button
+            variant="contained"
+            startIcon={<LoginIcon sx={{ fontSize: 24 }} />} // increase size here
+            onClick={() => setIsLoginOpen(true)}
+            className="!bg-gray-600 !text-white 
+                     !rounded-full !shadow-2xl 
+                     !px-6 !py-2 
+                     hover:!bg-gray-700 
+                     active:scale-95 
+                     transition-all duration-200"
+            sx={{
+              textTransform: "none",
+              fontSize: "0.875rem",
+              fontWeight: 500,
+            }}
+          >
+            Login
+          </Button>
+        ) : null}
+      </div>
+
+      {/* Mobile Hamburger */}
+      <IconButton
+        edge="start"
+        color="inherit"
+        aria-label="menu"
+        className="md:!hidden text-gray-200 hover:text-white"
+        onClick={() => setMobileMenuOpen(true)}
+      >
+        <MenuIcon fontSize="large" />
+      </IconButton>
+
+      {/* Mobile Menu Drawer */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-end">
+          <div className="w-64 bg-gray-900 h-full shadow-lg p-6 flex flex-col space-y-6">
+            {/* Close */}
+            <button
+              className="self-end text-gray-300 hover:text-white"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <CloseIcon />
+            </button>
+
+            {/* Nav Links */}
+            {menuItems.map((item) => (
+              <a
+                key={item}
+                href={`#${item.toLowerCase()}`}
+                className="text-gray-300 hover:text-white text-lg"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {item}
+              </a>
+            ))}
+
+            {/* Login / Profile on Mobile */}
+            {isLogin ? (
+              <ProfileMenu
+                setIsLogin={setIsLogin}
+
+              />
+            ) : (
+              <button
+                onClick={() => {
+                  setIsLoginOpen(true);
+                  setMobileMenuOpen(false);
+                }}
+                className="text-white bg-gray-700 px-4 py-2 rounded hover:bg-gray-600"
+              >
+                Login
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Login Modal */}
       <Modal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)}>

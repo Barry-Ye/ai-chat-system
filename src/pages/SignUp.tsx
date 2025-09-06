@@ -1,4 +1,6 @@
 import React from "react";
+import LoginIcon from "@mui/icons-material/Login";
+import { Button } from "@mui/material";
 
 const Signup: React.FC = () => {
   return (
@@ -29,12 +31,14 @@ const Signup: React.FC = () => {
             placeholder="Confirm Password"
             className="px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-400"
           />
-          <button
+          <Button
+            variant="contained"
             type="submit"
-            className="bg-gray-900 text-white py-3 rounded hover:bg-gray-800 transition"
+            startIcon={<LoginIcon />}
+            className="!bg-gray-900 text-white py-3 rounded hover:!bg-gray-800 transition"
           >
             Sign Up
-          </button>
+          </Button>
         </form>
 
         <p className="mt-6 text-center text-gray-700">
