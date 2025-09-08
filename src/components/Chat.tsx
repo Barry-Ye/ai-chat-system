@@ -60,7 +60,7 @@ const Chat: React.FC = () => {
 
     const userMessage: Message = {
       role: "user",
-      content: input || "[Sent a logo]",
+      content: input || "[Sent a Attachment]",
       fileName: file ? file.name : undefined,
     };
 
@@ -157,7 +157,7 @@ const Chat: React.FC = () => {
 
         {/* Chat history */}
         <div className="flex-1 overflow-y-auto space-y-2 custom-scrollbar">
-          <span className="text-sm text-gray-400 px-2 mb-4g block">Chat History</span>
+          <span className="text-sm text-gray-400 px-2 mb-4 block">Chat History</span>
           {conversations.map((conv) => {
             const firstMessage = conv.messages.find((m) => m.role === "user");
             return (
